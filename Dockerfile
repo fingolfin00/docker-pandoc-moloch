@@ -1,7 +1,7 @@
 FROM pandoc/latex:3.8.3
 
 # Use apk since image is Alpine-based
-RUN apk add --no-cache python3 py3-pip bash wget ca-certificates xz curl jq build-base font-liberation font-dejavu
+RUN apk add --no-cache python3 py3-pip bash wget ca-certificates xz curl jq build-base font-liberation font-dejavu git
 
 # Install python + tools, create venv
 ENV VENV_DIR=/opt/venv
@@ -27,8 +27,15 @@ RUN tlmgr install collection-xetex
 RUN tlmgr update --all
 
 # Copy custom templates (keep it here to take advantage of caching)
-COPY eisvogel-thesis.tex /usr/local/share/pandoc/templates/eisvogel-thesis.tex
-COPY eisvogel.tex /usr/local/share/pandoc/templates/eisvogel.tex
+ARG PANDOC_THEMES_REF=main
+RUN git clone https://github.com/fingolfin00/pandoc-themes.git /tmp/pandoc-themes && \
+    cd /tmp/pandoc-themes && \
+    git checkout ${PANDOC_THEMES_REF}
+
+RUN mkdir -p /usr/local/share/pandoc/templates && \
+    cp /tmp/pandoc-themes/eisvogel.tex /usr/local/share/pandoc/templates/ && \
+    cp /tmp/pandoc-themes/eisvogel-thesis.tex /usr/local/share/pandoc/templates/ && \
+    rm -rf /tmp/pandoc-themes
 
 # Add pandoc filters
 RUN mkdir -p /usr/local/share/pandoc/filters \
