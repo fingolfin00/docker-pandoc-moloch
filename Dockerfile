@@ -13,11 +13,14 @@ RUN python3 -m venv "${VENV_DIR}" \
 ENV PATH="${VENV_DIR}/bin:${PATH}"
 
 # Install LaTeX packages we saw missing (ignore failures to keep build resilient)
+# Pin tlmgr to the TeX Live 2025 repository to avoid cross-release errors
+RUN tlmgr option repository https://ftp.tu-chemnitz.de/pub/tug/historic/systems/texlive/2025/tlnet-final
 RUN tlmgr update --self || true
 RUN tlmgr install siunitx xkeyval footnotebackref varwidth pdflscape pagecolor mdframed zref needspace
 RUN tlmgr install titling sourcesanspro sourcecodepro footmisc xcolor inconsolata oberdiek moloch pdfcol
 RUN tlmgr install changepage cancel koma-script
 RUN tlmgr install etoolbox l3kernel l3packages
+RUN tlmgr install amsmath
 # Very long install
 RUN tlmgr install collection-latexrecommended collection-latexextra collection-fontsrecommended collection-fontsextra latexmk
 RUN tlmgr install collection-xetex
